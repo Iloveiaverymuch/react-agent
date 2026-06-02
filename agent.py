@@ -9,6 +9,8 @@ Usage:
     python agent.py "What is the square root of the number of lines in notes.txt?"
 """
 
+from __future__ import annotations
+
 import re
 import os
 import sys
