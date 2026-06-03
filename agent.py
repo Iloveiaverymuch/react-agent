@@ -25,6 +25,7 @@ You have access to these tools:
 - search(query) — search for information on a topic
 - calc(expression) — evaluate a math expression (e.g. "sqrt(144)", "2 ** 10")
 - file_read(path) — read the contents of a local file
+- run_python(code) — execute arbitrary Python code or evaluate an expression (e.g., to count lines, filter, or process local files)
 
 Always follow this exact format for each step:
 

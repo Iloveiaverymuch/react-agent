@@ -121,12 +121,55 @@ def search(query: str) -> str:
         return f"search error: {exc}"
 
 
+# ── Tool: run_python ──────────────────────────────────────────────────────────
+
+def run_python(code: str) -> str:
+    """
+    Execute arbitrary Python code or evaluate an expression.
+
+    If the code is a single expression, it evaluates and returns the result.
+    If it contains statements, it executes the code and returns the stdout.
+
+    Examples:
+        run_python("len([l for l in open('notes.txt') if ':' in l])")
+        run_python("import math; print(math.sqrt(256))")
+    """
+    # Strip quotes the model sometimes wraps around the argument
+    code = code.strip().strip("\"'")
+
+    # Try evaluating as an expression first
+    try:
+        compiled = compile(code, "<string>", "eval")
+        result = eval(compiled, {})
+        return str(result)
+    except SyntaxError:
+        # Not a single expression (contains statements like import, assignment, print, loops, etc.)
+        pass
+    except Exception as exc:
+        # Any other exception (like FileNotFoundError, NameError) is a real runtime error of the expression
+        return f"run_python error: {exc}"
+
+    # Fall back to exec for statements
+    import io
+    import contextlib
+
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        try:
+            exec(code, {})
+            stdout = f.getvalue()
+            return stdout if stdout else "Success (no stdout)"
+        except Exception as exc:
+            return f"run_python error: {exc}"
+
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────
 
 TOOLS: dict[str, callable] = {
     "calc":      calc,
     "file_read": file_read,
     "search":    search,
+    "run_python": run_python,
 }
 
 def execute_tool(tool_name: str, argument: str) -> str:
