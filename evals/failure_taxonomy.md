@@ -44,14 +44,12 @@
 
 ## Key Observations
 
-*(Fill in after reviewing results)*
-
-1. 
-2. 
-3. 
+1. **FM-MAXSTEP is the dominant failure mode.** The agent hit `max_steps=8` on multi-step math chains (B5: 2^8 → 2^4 → ratio). Root cause: model wrote `math.sqrt(x)` without `print()` inside `run_python`, got "no output" feedback, retried with variation, exhausted steps. Not a tool bug — a code generation habit.
+2. **Adversarial and search tasks are robust.** 10/10 combined. The agent correctly handled missing files, nonsense queries, `sqrt(-1)` (returned complex number explanation), and DuckDuckGo failures (self-recovered with rephrased queries).
+3. **Multi-hop is the weakest category (80%).** Chained math requiring multiple `run_python` calls in sequence exposes a latent issue: the agent sometimes forgets `print()` on intermediate steps, breaking the output capture loop.
 
 ## Top 3 Fixes
 
-1. 
-2. 
-3. 
+1. **Add `run_python` to the toolset** — replaces `calc`, handles arbitrary Python expressions including `print()` auto-wrapping for expression-mode inputs. Fixed B5 class failures. (Implemented in W02D4.)
+2. **Improve `run_python` description** — instruct the agent to always use `print()` for multi-statement code, and show an example. Reduces FM-MAXSTEP on chained math.
+3. **Increase `max_steps` for multi-hop tasks** — 8 steps is tight for 3-tool chains. 12 steps gives the agent room to recover from one bad intermediate step without hitting the ceiling.
